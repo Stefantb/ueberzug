@@ -16,6 +16,9 @@ Xdisplay.Display.__exit__ = lambda self, *args: self.close()
 PREPARED_DISPLAYS = []
 DISPLAY_SUPPLIES = 1
 
+import sys
+def eprint(*args, **kwargs):
+    print(*args, file=sys.stderr, **kwargs)
 
 class Events:
     """Async iterator class for x11 events"""
@@ -151,6 +154,18 @@ def get_first_pty(pids: list):
     return None
 
 
+def get_current_window():
+    active_window = None
+    with get_display() as display:
+        root = display.screen().root
+        active_window = root.get_full_property(
+            display.intern_atom('_NET_ACTIVE_WINDOW'),
+            Xlib.X.AnyPropertyType
+        ).value
+    for i in active_window:
+        return i
+
+
 def get_parent_window_infos():
     """Determines the window id of each
     terminal which displays the program using
@@ -172,7 +187,16 @@ def get_parent_window_infos():
 
         for pid in client_pids:
             ppids = get_parent_pids(pid)
+            # eprint(ppids)
             ppid_window_id_map = key_intersection(pid_window_id_map, ppids)
+            # eprint(ppid_window_id_map)
+
+            current_window = get_current_window()
+            eprint(current_window)
+            for k, v in ppid_window_id_map.items():
+                ppid_window_id_map[k] = current_window
+
+            # eprint(ppid_window_id_map)
             try:
                 window_pid, window_id = next(iter(sort_by_key_list(
                     ppid_window_id_map, ppids)))

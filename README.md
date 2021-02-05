@@ -1,4 +1,19 @@
+# Hacked to work with gnome-terminal-server
+
+Used a brutal hack that just inserts the current focused window id instead of
+tracing the window id from the PID.
+
+Gnome terminal uses a single server instance for multiple windows and the algorithm fails to find the correct window.
+It often ends up drawing on some other terminal window that is open.
+
+I install by cloning this repo
+```
+python3 -m pip install --user -e .
+```
+
+
 # Überzug
+
 
 Überzug is a command line util
 which allows to draw images on terminals by using child windows.
